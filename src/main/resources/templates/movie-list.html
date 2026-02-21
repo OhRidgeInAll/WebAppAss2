@@ -126,7 +126,7 @@
         </div>
     </div>
 
-    <!-- Results Info -->
+    <!-- Results formatting and output -->
     <div class="alert alert-info" th:if="${searchTitle != null or searchGenre != null or minRating != null}">
         Showing <span th:text="${movies.size()}">0</span> results
         <span th:if="${searchTitle != null}">for title containing: "<span th:text="${searchTitle}"></span>"</span>
@@ -146,7 +146,7 @@
                         <div>
                             <span class="badge bg-primary" th:text="${movie.genre}">Genre</span>
                             <span class="badge bg-secondary" th:text="${movie.releaseYear}">Year</span>
-                            <span class="badge bg-warning text-dark" th:text="${movie.duration} + ' min'">Duration</span>
+                            <span class="badge bg-warning text-dark" th:text="${movie.durationMinutes} + ' min'">Duration</span>
                         </div>
                     </div>
                     <div class="col-md-4 text-end">

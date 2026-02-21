@@ -1,10 +1,12 @@
 package org.example.assignment_2.controller;
 
+import jakarta.validation.Valid;
 import org.example.assignment_2.service.MovieService;
 import org.example.assignment_2.model.Movie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -62,8 +64,17 @@ public class MovieController {
     }
 
     @PostMapping("/save")
-    public String saveMovie(@ModelAttribute Movie movie) {
+    public String saveMovie(@Valid @ModelAttribute("movie") Movie movie,
+                            BindingResult result, Model model) {
+
+        if (result.hasErrors()) {
+            System.out.println("Form does not match formatting");
+            return "movie-form";
+        }
+
+        System.out.println("DEBUG: Saving movie: " + movie.getTitle());
         movieService.saveMovie(movie);
+
         return "redirect:/movies";
     }
 
