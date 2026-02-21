@@ -5,6 +5,21 @@
     <title>Title</title>
 </head>
 <body>
-
+<div class="search-box">
+    <form th:action="@{/movies/search}" method="get">
+        <input type="text" name="title" placeholder="Search by title"
+               th:value="${searchTitle ?: ''}">
+        <input type="text" name="genre" placeholder="Search by genre"
+               th:value="${searchGenre ?: ''}">
+        <select name="minRating">
+            <option value="">Any rating</option>
+            <option value="7">7+ stars</option>
+            <option value="8">8+ stars</option>
+            <option value="9">9+ stars</option>
+        </select>
+        <button type="submit">Search</button>
+        <a th:href="@{/movies}">Clear</a>
+    </form>
+</div>
 </body>
 </html>
