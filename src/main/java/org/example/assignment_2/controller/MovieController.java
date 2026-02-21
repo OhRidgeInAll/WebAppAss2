@@ -11,13 +11,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Controller
+@RequestMapping("/movies")
 public class MovieController {
 
     @Autowired
     private MovieService movieService;
 
-    // Main page ive integrated search there
-    @GetMapping("/movies")
+    @GetMapping
     public String listMovies(
             @RequestParam(required = false) String title,
             @RequestParam(required = false) String genre,
@@ -26,7 +26,6 @@ public class MovieController {
 
         List<Movie> movies;
 
-        //Criteria check
         if ((title != null && !title.isEmpty()) ||
                 (genre != null && !genre.isEmpty()) ||
                 minRating != null) {
@@ -46,13 +45,13 @@ public class MovieController {
         return "movie-list";
     }
 
-    @GetMapping("/movies/new")
+    @GetMapping("/new")
     public String showAddForm(Model model) {
         model.addAttribute("movie", new Movie());
         return "movie-form";
     }
 
-    @GetMapping("/movies/edit/{id}")
+    @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model) {
         Optional<Movie> movie = movieService.getMovieById(id);
         if (movie.isPresent()) {
@@ -62,20 +61,13 @@ public class MovieController {
         return "redirect:/movies";
     }
 
-    @PostMapping("/movies/new")
+    @PostMapping("/save")
     public String saveMovie(@ModelAttribute Movie movie) {
         movieService.saveMovie(movie);
         return "redirect:/movies";
     }
 
-    @PostMapping("/movies/edit/{id}")
-    public String updateMovie(@PathVariable Long id, @ModelAttribute Movie movie) {
-        movie.setId(id);
-        movieService.saveMovie(movie);
-        return "redirect:/movies";
-    }
-
-    @GetMapping("/movies/delete/{id}")
+    @GetMapping("/delete/{id}")
     public String deleteMovie(@PathVariable Long id) {
         movieService.deleteMovie(id);
         return "redirect:/movies";

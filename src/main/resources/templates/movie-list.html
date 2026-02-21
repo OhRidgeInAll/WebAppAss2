@@ -1,25 +1,185 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Collection</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .search-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .search-form .form-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .search-form input, .search-form select {
+            flex: 1;
+            min-width: 150px;
+        }
+        .movie-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .movie-rating {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        .badge {
+            font-size: 0.8em;
+        }
+        .stats-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+    </style>
 </head>
 <body>
-<div class="search-box">
-    <form th:action="@{/movies/search}" method="get">
-        <input type="text" name="title" placeholder="Search by title"
-               th:value="${searchTitle ?: ''}">
-        <input type="text" name="genre" placeholder="Search by genre"
-               th:value="${searchGenre ?: ''}">
-        <select name="minRating">
-            <option value="">Any rating</option>
-            <option value="7">7+ stars</option>
-            <option value="8">8+ stars</option>
-            <option value="9">9+ stars</option>
-        </select>
-        <button type="submit">Search</button>
-        <a th:href="@{/movies}">Clear</a>
-    </form>
+<div class="container">
+    <div class="header">
+        <h1>Movie Collection</h1>
+        <p class="lead">Browse and manage your favorite movies</p>
+    </div>
+
+    <div class="search-section">
+        <h3>Search Movies</h3>
+        <form th:action="@{/movies}" method="get" class="search-form">
+            <div class="form-row">
+                <input type="text" name="title"
+                       th:value="${searchTitle ?: ''}"
+                       placeholder="Title contains..."
+                       class="form-control">
+
+                <input type="text" name="genre"
+                       th:value="${searchGenre ?: ''}"
+                       placeholder="Genre contains..."
+                       class="form-control">
+
+                <select name="minRating" class="form-control">
+                    <option value="">Any rating</option>
+                    <option value="5" th:selected="${minRating == 5}">* 5+</option>
+                    <option value="6" th:selected="${minRating == 6}">* 6+</option>
+                    <option value="7" th:selected="${minRating == 7}">* 7+</option>
+                    <option value="8" th:selected="${minRating == 8}">* 8+</option>
+                    <option value="9" th:selected="${minRating == 9}">* 9+</option>
+                </select>
+
+                <button type="submit" class="btn btn-primary">Search</button>
+                <a th:href="@{/movies}" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="stats-card text-center">
+                <h5>Total Movies</h5>
+                <h2 th:text="${movieCount}">0</h2>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card text-center">
+                <h5>Average Rating</h5>
+                <h2 th:text="${averageRating} + '*'">0.0*</h2>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card text-center">
+                <h5>Actions</h5>
+                <a th:href="@{/movies/new}" class="btn btn-success">➕ Add New Movie</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Info -->
+    <div class="alert alert-info" th:if="${searchTitle != null or searchGenre != null or minRating != null}">
+        Showing <span th:text="${movies.size()}">0</span> results
+        <span th:if="${searchTitle != null}">for title containing: "<span th:text="${searchTitle}"></span>"</span>
+        <span th:if="${searchGenre != null}">for genre containing: "<span th:text="${searchGenre}"></span>"</span>
+        <span th:if="${minRating != null}">with minimum rating: <span th:text="${minRating}"></span>+</span>
+    </div>
+
+    <!-- Movies List -->
+    <div class="row" th:if="${not #lists.isEmpty(movies)}">
+        <div class="col-12" th:each="movie : ${movies}">
+            <div class="movie-card">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h4 th:text="${movie.title}">Movie Title</h4>
+                        <p class="text-muted" th:text="${movie.director}">Director</p>
+                        <p th:text="${movie.description}">Description...</p>
+                        <div>
+                            <span class="badge bg-primary" th:text="${movie.genre}">Genre</span>
+                            <span class="badge bg-secondary" th:text="${movie.releaseYear}">Year</span>
+                            <span class="badge bg-warning text-dark" th:text="${movie.duration} + ' min'">Duration</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="movie-rating">
+                            <h3 th:text="${movie.rating} + '*'">0.0*</h3>
+                        </div>
+                        <div class="action-buttons">
+                            <a th:href="@{/movies/edit/{id}(id=${movie.id})}"
+                               class="btn btn-sm btn-outline-primary">Edit</a>
+                            <a th:href="@{/movies/delete/{id}(id=${movie.id})}"
+                               class="btn btn-sm btn-outline-danger"
+                               onclick="return confirm('Are you sure you want to delete this movie?')">🗑️ Delete</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="text-center" th:if="${#lists.isEmpty(movies)}">
+        <div class="alert alert-warning">
+            <h4>No movies found</h4>
+            <p th:if="${searchTitle != null or searchGenre != null or minRating != null}">
+                Try adjusting your search criteria
+            </p>
+            <p th:unless="${searchTitle != null or searchGenre != null or minRating != null}">
+                <a th:href="@{/movies/new}" class="btn btn-primary">Add your first movie</a>
+            </p>
+        </div>
+    </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
